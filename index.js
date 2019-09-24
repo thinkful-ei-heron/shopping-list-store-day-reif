@@ -2,16 +2,16 @@
 
 const store = {
   items: [
-    { id: cuid(), name: 'apples', checked: false },
-    { id: cuid(), name: 'oranges', checked: false },
-    { id: cuid(), name: 'milk', checked: true },
-    { id: cuid(), name: 'bread', checked: false }
+    { id: cuid(), name: 'apples', checked: false, edit: false },
+    { id: cuid(), name: 'oranges', checked: false, edit: false },
+    { id: cuid(), name: 'milk', checked: true, edit: false },
+    { id: cuid(), name: 'bread', checked: false, edit: false }
   ],
   hideCheckedItems: false
 };
 
 const generateItemElement = function (item) {
-  let itemTitle = `<span class='shopping-item shopping-item__checked'>${item.name}</span>`;
+  let itemTitle = `<span class='shopping-item shopping-item__checked'>${item.name}</span><input hidden></input>`;
   if (!item.checked) {
     itemTitle = `
      <span class='shopping-item'>${item.name}</span>
@@ -24,6 +24,9 @@ const generateItemElement = function (item) {
       <div class='shopping-item-controls'>
         <button class='shopping-item-toggle js-item-toggle'>
           <span class='button-label'>check</span>
+        </button>
+        <button class='shopping-item-edit js-item-edit'>
+          <span class='button-label'>edit</span>
         </button>
         <button class='shopping-item-delete js-item-delete'>
           <span class='button-label'>delete</span>
@@ -86,6 +89,7 @@ const toggleCheckedForListItem = function (id) {
 const handleItemCheckClicked = function () {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     const id = getItemIdFromElement(event.currentTarget);
+    console.log(id);
     toggleCheckedForListItem(id);
     render();
   });
@@ -110,6 +114,7 @@ const deleteListItem = function (id) {
   // the specified id using the native
   // Array.prototype.findIndex() method. 
   const index = store.items.findIndex(item => item.id === id);
+  console.log(index);
   // Then we call `.splice` at the index of 
   // the list item we want to remove, with 
   // a removeCount of 1.
@@ -127,6 +132,33 @@ const handleDeleteItemClicked = function () {
     // Render the updated shopping list.
     render();
   });
+};
+
+const handleEditItemClicked = () => {
+  $('.js-shopping-list').on('click', '.js-item-edit', e => {
+    // console.log('clicked edit button');
+    const id = getItemIdFromElement(e.currentTarget);
+    // change edit flag
+    store.items.find(item => item.id === id).edit = true;
+    // handle actual edit
+    editListItem(id);
+    // rerender
+    render();
+  });
+};
+
+const editListItem = (id) => {
+  // console.log(`id: ${id}`);
+  const index = store.items.findIndex(item => item.id === id);
+  // console.log(`id: ${index}`);
+  let itemName = store.items[index].name;
+  if (store.items[index].edit === true) {
+    // prompt for new item name
+    store.items[index].name = prompt('Enter new item name:', `${itemName}`);
+    // reset edit flag
+    store.items[index].edit = false;
+    // console.log(store.items[index].edit);
+  }
 };
 
 /**
@@ -162,6 +194,7 @@ const handleShoppingList = function () {
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleToggleFilterClick();
+  handleEditItemClicked();
 };
 
 // when the page loads, call `handleShoppingList`
